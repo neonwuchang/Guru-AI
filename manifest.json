@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "Guru AI",
+  "description": "Interactive Learning Extension",
+  "version": "1.0",
+  "action": {
+    "default_popup": "main.html",
+    "default_icon": "Images/guru_ai_logo.png"
+  }
+}
