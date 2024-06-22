@@ -1,5 +1,26 @@
-<html>
-  <body>
-    <h1>Welcome to Guru AI Extension</h1>
-  </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guru-AI</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <div id="navbar">
+            <button class="nav-button" id="chatbot-tab">Chatbot</button>
+            <button class="nav-button" id="talk-tab">Talk</button>
+            <button class="nav-button" id="settings-tab">Settings</button>
+        </div>
+        <div id="content">
+            <!-- Dynamic content will be inserted here -->
+        </div>
+        <div id="footer">
+            <input type="text" id="text-input" placeholder="Type a message...">
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
 </html>
