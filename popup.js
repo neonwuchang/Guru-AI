@@ -9,8 +9,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const footer = document.getElementById('footer');
     const mic = document.getElementById('mic');
     const typingIndicator = document.getElementById('typing-indicator');
-    //const apiKey = ''; // Replace with your OpenAI API key
+    const apiKey = 'YOUR_OPENAI_API_KEY'; // Replace with your OpenAI API key
+    const humeApiKey = 'XGp3jgWAzNPFrTFcSWXeuScU0HWorZvsQrgB2p2wAl7NYXQe'; // Replace with your Hume API key
     let currentTab = 'chatbot';
+    let mediaRecorder;
+    let audioChunks = [];
+    let ws;
 
     function loadChatbot() {
         currentTab = 'chatbot';
@@ -28,6 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
         footer.style.display = 'none';
         voiceFooter.style.display = 'flex';
         setActiveTab(talkTab);
+        connectWebSocket();
     }
 
     function loadSettings() {
@@ -125,6 +130,103 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    function initializeVoiceRecognition(stream) {
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = event => {
+            audioChunks.push(event.data);
+        };
+        mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            audioChunks = [];
+            displayTalkMessage('Audio Blob created.');
+            sendAudioToWebSocket(audioBlob);
+        };
+    }
+
+    function startVoiceRecognition() {
+        if (mediaRecorder) {
+            mediaRecorder.start();
+            mic.classList.add('listening');
+            displayTalkMessage('Voice recognition started...');
+        }
+    }
+
+    function stopVoiceRecognition() {
+        if (mediaRecorder) {
+            mediaRecorder.stop();
+            mic.classList.remove('listening');
+            displayTalkMessage('Voice recognition stopped...');
+        }
+    }
+
+    async function requestMicrophoneAccess() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            initializeVoiceRecognition(stream);
+            startVoiceRecognition();
+        } catch (error) {
+            displayTalkMessage(`Error accessing microphone: ${error.message}`);
+        }
+    }
+
+    function connectWebSocket() {
+        ws = new WebSocket(`wss://api.hume.ai/v0/evi/chat?api_key=${humeApiKey}`);
+
+        ws.onopen = () => {
+            displayTalkMessage('WebSocket connection established');
+        };
+
+        ws.onmessage = (event) => {
+            const message = JSON.parse(event.data);
+            if (message.data) {
+                displayTalkMessage(`Response from EVI: ${JSON.stringify(message.data)}`);
+                playAudio(message.data);
+            } else {
+                displayTalkMessage(`Response from EVI: No data received`);
+            }
+        };
+
+        ws.onerror = (error) => {
+            displayTalkMessage(`WebSocket error: ${error.message}`);
+        };
+
+        ws.onclose = () => {
+            displayTalkMessage('WebSocket connection closed');
+        };
+    }
+
+    function sendAudioToWebSocket(audioBlob) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const base64Audio = reader.result.split(',')[1];
+            displayTalkMessage('Sending audio to WebSocket...');
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'audio_input',
+                    data: base64Audio
+                }));
+            } else {
+                displayTalkMessage('WebSocket is not open.');
+            }
+        };
+        reader.readAsDataURL(audioBlob);
+    }
+
+    function playAudio(base64Audio) {
+        const audio = new Audio(`data:audio/wav;base64,${base64Audio}`);
+        audio.play().then(() => {
+            displayTalkMessage('Audio playback started.');
+        }).catch((error) => {
+            displayTalkMessage(`Error playing audio: ${error.message}`);
+        });
+    }
+
+    function displayTalkMessage(message) {
+        const talkMessage = document.createElement('p');
+        talkMessage.innerHTML = `<strong>EVI:</strong> ${message}`;
+        content.appendChild(talkMessage);
+    }
+
     sendButton.addEventListener('click', handleMessageSend);
 
     textInput.addEventListener('keydown', function (event) {
@@ -147,23 +249,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     mic.addEventListener('click', function () {
         if (!mic.classList.contains('listening')) {
-            startVoiceRecognition();
+            requestMicrophoneAccess();
         } else {
             stopVoiceRecognition();
         }
     });
-
-    function startVoiceRecognition() {
-        mic.classList.add('listening');
-        console.log('Voice recognition started...');
-        // Here you would integrate the Web Speech API
-    }
-
-    function stopVoiceRecognition() {
-        mic.classList.remove('listening');
-        console.log('Voice recognition stopped...');
-        // Here you would integrate the Web Speech API
-    }
 
     // Load default tab
     loadChatbot();
