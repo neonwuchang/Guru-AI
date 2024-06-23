@@ -10,8 +10,5 @@
   "action": {
     "default_popup": "main.html",
     "default_icon": "Images/guru_ai_logo.png"
-  },
-  "background": {
-    "service_worker": "background.js"
   }
 }
