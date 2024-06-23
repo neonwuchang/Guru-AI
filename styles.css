@@ -5,6 +5,7 @@ body {
     width: 400px;
     height: 600px;
     display: flex;
+    background-color: rgba(234, 242, 238, 0.81);
     flex-direction: column;
 }
 
@@ -17,9 +18,9 @@ body {
 #navbar {
     display: flex;
     justify-content: space-around;
-    background-color: #f1f1f1;
+    background-color: rgba(20, 208, 108, 0.81);
     padding: 10px 0;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid #4d655c;
 }
 
 .nav-button {
@@ -42,26 +43,26 @@ body {
 #footer {
     display: flex;
     padding: 10px;
-    border-top: 1px solid #ccc;
+    border-top: 1px solid #4d655c;
 }
 
 #text-input {
     flex: 1;
     padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    border: 1px solid #4d655c;
+    border-radius: 15px;
 }
 
 #send-button {
     margin-left: 10px;
     padding: 10px 20px;
-    background-color: #4CAF50;
+    background-color: rgba(20, 208, 108, 0.81);
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 15px;
     cursor: pointer;
 }
 
 #send-button:hover {
-    background-color: #45a049;
+    background-color: rgba(20, 208, 108, 0.81);
 }
